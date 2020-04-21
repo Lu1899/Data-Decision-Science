@@ -1,7 +1,9 @@
 # Data Decision Science
 Data Analysis of Financial Data and Trading Strategies
 
-#------- Inhalt der Files -------#
+
+
+# Inhalt der Files
 
 # Data    
 Ordner, der die jeweiligen Rohdaten für jeden Markt enthält. Die enthaltenen Dateien wurden im Rahmen des Skripts "expolarory_data_analysis.py" zusammengeführt.
