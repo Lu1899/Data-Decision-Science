@@ -48,13 +48,15 @@ def sharpe_ratio(series, return_rates):
 
 #Bootstraps
 #% Erstellen der Bootstraps
-def bootstrap(series, return_rates, number_replicates=10, chunksize=0):
+def bootstrap(series, return_rates, number_replicates=10, chunksize=0, seed=None):
     '''Funktion, die die angegebene Anzahl von Bootsraps für die Markt-Series zurückgibt.
     Hierbei wird berücksichtigt, dass es sich um zeitlich abhängige Arrays handelt. Als Input 
     muss die Zeitreihe sowie eine Series der dazugehörigen Renditen, anhand dessen der Bootstrap 
-    erstellt wird, angegeben werden. Des Weiteren kann die Anzahl der Straps (Default=10) und die
-    Chunksize (Default=0, also keine Chunks) bestimmt werden.'''
+    erstellt wird, angegeben werden. Des Weiteren kann die Anzahl der Straps (Default=10), die
+    Chunksize (Default=0, also keine Chunks) und die Seed-Zahl bestimmt werden.'''
     start = time.time()
+    if seed != None:
+        random.seed(seed)
     bootstraps = []
     for iteration in range(number_replicates):
         bootstrap = [series.fillna(method='bfill')[0]]
@@ -112,7 +114,6 @@ def detect_signal_change(signals):
     return signal_change
     
     
-    
 #% Renditen gemäß Umsetzung    
 def umsetzung_gewichtung(signals, umsetzungen):
     '''Funktion, die ausliest, zu welchen Anteilen jeweils gemäß der Umsetzung in die Strategie
@@ -147,14 +148,32 @@ def umsetzung_gewichtung(signals, umsetzungen):
     weights[normal_weights] = (signals ** 2)[normal_weights]
     return weights
     
+<<<<<<< Updated upstream
+    
+=======
+#Signale    
+#% 38/200 Momentum
+def crossover_signal(series, avg_short=38, avg_long=200):
+    '''Funktion, die das Momentum-Modell einer Series anhand einer Crossover-Strategie zurück gibt. Hierbei
+    kann die untere  (Default=38) und die obere Durchschnittsgrenze (Default=200) bei Bedarf variiert werden.'''
+    momentum_df = pd.DataFrame(series.fillna(methond='bfill'))
+    momentum_df['avg_short'] = momentum_df[series.name].rolling(avg_short, win_type=None)
+    momentum_df['avg_long'] = momentum_df[series.name].rolling(avg_long, win_type=None)
+    momentum_df['difference'] = momentum_df['avg_short'] - momentum_df['avg_long']
+    def momentum(x):
+        if x > 0:
+            return 1
+        elif x == 0:
+            return 0
+        elif x < 0:
+            return -1
+        else:
+            return np.nan
+    momentum_df['signal'] = momentum_df['difference'].apply(momentum)
+    return momentum_df['signal']
+>>>>>>> Stashed changes
     
     
     
     
-    
-    
-    
-    
-    
-    
-    
+      
