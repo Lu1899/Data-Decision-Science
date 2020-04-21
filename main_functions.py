@@ -148,7 +148,6 @@ def umsetzung_gewichtung(signals, umsetzungen):
     return weights
     
 #Signale 
-    
 #% 38/200 Momentum
 def crossover_signal(series, avg_short=38, avg_long=200):
     '''Funktion, die das Momentum-Modell einer Series anhand einer Crossover-Strategie zurück gibt. Hierbei
