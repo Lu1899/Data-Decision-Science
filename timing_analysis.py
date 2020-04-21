@@ -33,6 +33,12 @@ mf.plot_bootstraps(series, bootstraps, 'Crude Oil Future', 'CL1')
 
 print(mf.sharpe_ratio(series, return_rates))
 
+
+#test
+#test
+def test(x, y):
+    return x + y
+
 signale = df_cl1['crossover_signal']
 
 signal_change = mf.detect_signal_change(signale)
@@ -43,12 +49,6 @@ umsetzungen = {'days': [1, 5],
 from datetime import timedelta
 
 gewichtungen = mf.umsetzung_gewichtung(signale, umsetzungen)
-    
-
-#test
-#test
-def test(x, y):
-    return x + y
 
 
 
