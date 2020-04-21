@@ -15,6 +15,7 @@ import main_functions as mf
 #Allgemeine Module
 import pandas as pd
 import os
+import np
 
 
 os.chdir(os.getcwd() + '\\Data')
@@ -23,28 +24,26 @@ df_cl1 = pd.read_csv('CL1_index.csv', header=0, index_col='date', parse_dates=['
 series = df_cl1['px_last']
 return_rates = mf.rate_of_return(series)
 
-bootstraps = mf.bootstrap(series, return_rates, chunksize=180)
-
-for bootstrap in bootstraps:
-    bootstrap = pd.Series(bootstrap)
-    print(mf.sharpe_ratio(bootstrap, mf.rate_of_return(bootstrap)))
-    
-mf.plot_bootstraps(series, bootstraps, 'Crude Oil Future', 'CL1')
-
-print(mf.sharpe_ratio(series, return_rates))
-
-signale = df_cl1['crossover_signal']
-
-signal_change = mf.detect_signal_change(signale)
-
-umsetzungen = {'days': [1, 5],
-               'portions': [0.5, 1]}
-
-from datetime import timedelta
-
-gewichtungen = mf.umsetzung_gewichtung(signale, umsetzungen)
+def crossover_signal(series, avg_short=38, avg_long=200):
+    '''Funktion, die das Momentum-Modell einer Series anhand einer Crossover-Strategie zurück gibt. Hierbei
+    kann die untere  (Default=38) und die obere Durchschnittsgrenze (Default=200) bei Bedarf variiert werden.'''
+    momentum_df = pd.DataFrame(series.fillna(method='bfill'))
+    momentum_df['avg_short'] = momentum_df[series.name].rolling(avg_short, win_type=None).mean()
+    momentum_df['avg_long'] = momentum_df[series.name].rolling(avg_long, win_type=None).mean()
+    momentum_df['difference'] = momentum_df['avg_short'] - momentum_df['avg_long']
+    def momentum(x):
+        if x > 0:
+            return 1
+        elif x == 0:
+            return 0
+        elif x < 0:
+            return -1
+        else:
+            return np.nan
+    momentum_df['signal'] = momentum_df['difference'].apply(momentum)
+    return momentum_df['signal']
     
 
 
-
+signal_momentum = crossover_signal(series)
 

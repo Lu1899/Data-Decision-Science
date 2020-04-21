@@ -147,18 +147,15 @@ def umsetzung_gewichtung(signals, umsetzungen):
     normal_weights = list(normal_weights[~normal_weights.isin(changes)])
     weights[normal_weights] = (signals ** 2)[normal_weights]
     return weights
-    
-<<<<<<< Updated upstream
-    
-=======
+
 #Signale    
 #% 38/200 Momentum
 def crossover_signal(series, avg_short=38, avg_long=200):
     '''Funktion, die das Momentum-Modell einer Series anhand einer Crossover-Strategie zurück gibt. Hierbei
     kann die untere  (Default=38) und die obere Durchschnittsgrenze (Default=200) bei Bedarf variiert werden.'''
-    momentum_df = pd.DataFrame(series.fillna(methond='bfill'))
-    momentum_df['avg_short'] = momentum_df[series.name].rolling(avg_short, win_type=None)
-    momentum_df['avg_long'] = momentum_df[series.name].rolling(avg_long, win_type=None)
+    momentum_df = pd.DataFrame(series.fillna(method='bfill'))
+    momentum_df['avg_short'] = momentum_df[series.name].rolling(avg_short, win_type=None).mean()
+    momentum_df['avg_long'] = momentum_df[series.name].rolling(avg_long, win_type=None).mean()
     momentum_df['difference'] = momentum_df['avg_short'] - momentum_df['avg_long']
     def momentum(x):
         if x > 0:
@@ -171,8 +168,7 @@ def crossover_signal(series, avg_short=38, avg_long=200):
             return np.nan
     momentum_df['signal'] = momentum_df['difference'].apply(momentum)
     return momentum_df['signal']
->>>>>>> Stashed changes
-    
+
     
     
     
