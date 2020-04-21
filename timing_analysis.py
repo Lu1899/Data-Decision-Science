@@ -45,6 +45,10 @@ from datetime import timedelta
 gewichtungen = mf.umsetzung_gewichtung(signale, umsetzungen)
     
 
+#test
+#test
+def test(x, y):
+    return x + y
 
 
 
