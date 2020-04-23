@@ -204,7 +204,47 @@ def best_reading(high_series, low_series, trend, window=20):
     dataframe_br['trend'] = trend
     dataframe_br['best_reading'] = dataframe_br.apply(pick_reading, axis=1)
     return dataframe_br['best_reading']
+
+    #% Erkennen des Signals
+def clewno_counter_plunger_signals(df):
+    '''Funktion, ...'''
     
+    #------------------------#
+    #----- IN PROGRESS! -----#
+    #------------------------#
+    
+    status = np.nan
+    stop = np.nan
+    target = np.nan
+    df['signal'] = np.nan
+    for index, row in df.iterrows():
+        if ((status != 1) & (row['atr'] >= 3)):
+            status = 1
+            stop = row['px_last'] - (row['atr'] * 2)
+            target = row['px_last'] + (row['atr'] * 4)
+            df.loc[index, 'signal'] = 1
+        elif status == 1: 
+            if row['px_last'] <= stop:
+                status = 0
+                stop = np.nan
+                target = np.nan
+                df.loc[index, 'signal'] = 0
+            elif row['px_last'] >= target:
+                status = 0
+                stop = np.nan
+                target = np.nan
+                df.loc[index, 'signal'] = 0
+            elif row['trend'] <= 0:
+                status = 0
+                stop = np.nan
+                target = np.nan
+                df.loc[index, 'signal'] = 0
+            else:
+                df.loc[index, 'signal'] = 1
+        else:
+            pass
+        return df
+                
     #% Ermitteln der relevanten Kennzahlen 
 def clenow_counter_plunger(high_series, low_series, close_series, ewm_lower=50, ewm_higher=100, window_reading=20):
     '''Funktion,...'''
