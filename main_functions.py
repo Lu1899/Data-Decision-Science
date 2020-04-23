@@ -170,9 +170,63 @@ def crossover_signal(series, avg_short=38, avg_long=200):
     momentum_df['signal'] = momentum_df['difference'].apply(momentum)
     return momentum_df['signal']
     
+#% Clenow Counter Plunger
+    #% Average True Range
+def average_true_range(high_series, low_series, close_series, true_range=20):
+    '''Funktion, die anhand der Low-, High- und Closing-Prices die Avereage True Range berechnet und als 
+    Series zurückgibt.'''
+    dataframe_atr = pd.DataFrame()
+    dataframe_atr['ATR1'] = abs (high_series - low_series)
+    dataframe_atr['ATR2'] = abs (high_series - close_series.shift())
+    dataframe_atr['ATR3'] = abs (low_series - close_series.shift())
+    dataframe_atr['TrueRange'] = dataframe_atr[['ATR1', 'ATR2', 'ATR3']].max(axis=1).fillna(method='bfill')
+    dataframe_atr['AverageTrueRange'] = dataframe_atr['TrueRange'].rolling(true_range, win_type=None).mean()
+    return dataframe_atr['AverageTrueRange']
+
+    #% Auswählen des jeweigen besten Readings
+def pick_reading(row):
+    '''Funktion, die anhand eines Trend-Wertes jeweils den Maximal- oder den Minimalwert einer Observation zurückgibt.
+    Diese Funktion geht Hand in Hand mit der Funktion "best_reading".'''
+    if row['trend'] == 1:
+        return row['high']
+    elif row['trend'] == -1:
+        return row['low']
+    else:
+        return np.nan
+
+    #% Ermitteln der besten Readings
+def best_reading(high_series, low_series, trend, window=20):
+    '''Funktion, die anhand der High- und der Low-Prices sowie der Trend-Zeitreihe die jeweils besten Readings 
+    ermittelt.'''
+    dataframe_br = pd.DataFrame()
+    dataframe_br['high'] = high_series.fillna(method='bfill').rolling(window, win_type=None).max()
+    dataframe_br['low'] = low_series.fillna(method='bfill').rolling(window, win_type=None).min()
+    dataframe_br['trend'] = trend
+    dataframe_br['best_reading'] = dataframe_br.apply(pick_reading, axis=1)
+    return dataframe_br['best_reading']
     
+    #% Ermitteln der relevanten Kennzahlen 
+def clenow_counter_plunger(high_series, low_series, close_series, ewm_lower=50, ewm_higher=100, window_reading=20):
+    '''Funktion,...'''
     
+    #------------------------#
+    #----- IN PROGRESS! -----#
+    #------------------------#
     
+    dataframe_ccp = pd.DataFrame(close_series, columns=['px_last'])
+    dataframe_ccp['trend'] = dataframe_ccp['px_last'].ewm(span=ewm_lower).mean() - dataframe_ccp['px_last'].ewm(span=ewm_higher).mean()
+    def calc_trend(x):
+        if x > 0:
+            return 1
+        elif x < 0: 
+            return -1
+        else:
+            return 0
+    dataframe_ccp['trend'] = dataframe_ccp['trend'].apply(calc_trend)
+    dataframe_ccp['atr'] = average_true_range(high_series, low_series, close_series)
+    dataframe_ccp['best_reading'] = best_reading(high_series, low_series, dataframe_ccp['trend'], window=window_reading)
+    dataframe_ccp['atr_difference'] = (dataframe_ccp['px_last'] - dataframe_ccp['best_reading']) / dataframe_ccp['atr']
+    return dataframe_ccp
     
     
     

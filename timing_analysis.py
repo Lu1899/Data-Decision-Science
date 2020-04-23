@@ -22,16 +22,9 @@ os.chdir(os.getcwd() + '\\Data')
 df_cl1 = pd.read_csv('CL1_index.csv', header=0, index_col='date', parse_dates=['date'])
 
 series = df_cl1['px_last']
-return_rates = mf.rate_of_return(series)
-
-momentum_signals = mf.crossover_signal(series)
 
 
-
-
-
-
-
+    
 
 
 
