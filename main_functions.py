@@ -237,8 +237,8 @@ def clenow_counter_plunger(high_series, low_series, close_series, ewm_lower=50, 
     #------------------------#
     
     dataframe_ccp = pd.DataFrame(close_series, columns=['px_last'])
-    dataframe_ccp['trend'] = dataframe_ccp['px_last'].ewm(span=ewm_lower).mean() - \
-    dataframe_ccp['px_last'].ewm(span=ewm_higher).mean()
+    dataframe_ccp['trend'] = dataframe_ccp['px_last'].ewm(span=ewm_lower, min_periods=ewm_lower).mean() - \
+    dataframe_ccp['px_last'].ewm(span=ewm_higher, min_periods=ewm_higher).mean()
     dataframe_ccp['trend'] = dataframe_ccp['trend'].apply(calc_trend)
     dataframe_ccp['atr'] = average_true_range(high_series, low_series, close_series, true_range=true_range)
     dataframe_ccp['best_reading'] = best_reading(high_series, low_series, dataframe_ccp['trend'], window=window_reading)
