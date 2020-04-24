@@ -37,6 +37,11 @@ def rate_of_return(series, kind='normal'):
 #% Jensen Alpha
 def jensen_alpha(series, kind='normal'):
     '''Funktion, anhand dessen das Jensen Alpha einer Series berechnet werden kann.'''
+        
+    #------------------------#
+    #----- IN PROGRESS! -----#
+    #------------------------#
+    
     pass
     print('Diese Funktion ist noch nicht fertig!')
 
