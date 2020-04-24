@@ -25,7 +25,7 @@ high_series = df_cl1['px_high']
 low_series = df_cl1['px_low']
 close_series = df_cl1['px_last']
 
-
+df_ccp = mf.clenow_counter_plunger(high_series, low_series, close_series)
 
 
 

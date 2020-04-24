@@ -37,6 +37,11 @@ def rate_of_return(series, kind='normal'):
 #% Jensen Alpha
 def jensen_alpha(series, kind='normal'):
     '''Funktion, anhand dessen das Jensen Alpha einer Series berechnet werden kann.'''
+        
+    #------------------------#
+    #----- IN PROGRESS! -----#
+    #------------------------#
+    
     pass
     print('Diese Funktion ist noch nicht fertig!')
 
@@ -112,9 +117,7 @@ def detect_signal_change(signals):
     signal_change = pd.Series([convert_signal_change(x) for x in signal_change])
     signal_change.index = signals.index
     return signal_change
-    
-    
-    
+       
 #% Renditen gemäß Umsetzung    
 def umsetzung_gewichtung(signals, umsetzungen):
     '''Funktion, die ausliest, zu welchen Anteilen jeweils gemäß der Umsetzung in die Strategie
@@ -151,6 +154,20 @@ def umsetzung_gewichtung(signals, umsetzungen):
     
 #Signale 
 #% 38/200 Momentum
+    #% Momentum   
+def momentum(obs):
+    '''Funktion, die anhand einer Observation das Momentum bestimmt. Hierbei stellt die Observation eine Differenz
+    von relevanten Crossover-Kennzahlen dar.'''
+    if obs > 0:
+        return 1
+    elif obs == 0:
+        return 0
+    elif obs < 0:
+        return -1
+    else:
+        return np.nan
+    
+    #% Signalberechnung
 def crossover_signal(series, avg_short=38, avg_long=200):
     '''Funktion, die das Momentum-Modell einer Series anhand einer Crossover-Strategie zurück gibt. Hierbei
     kann die untere  (Default=38) und die obere Durchschnittsgrenze (Default=200) bei Bedarf variiert werden.'''
@@ -158,15 +175,6 @@ def crossover_signal(series, avg_short=38, avg_long=200):
     momentum_df['avg_short'] = momentum_df[series.name].rolling(avg_short, win_type=None).mean()
     momentum_df['avg_long'] = momentum_df[series.name].rolling(avg_long, win_type=None).mean()
     momentum_df['difference'] = momentum_df['avg_short'] - momentum_df['avg_long']
-    def momentum(x):
-        if x > 0:
-            return 1
-        elif x == 0:
-            return 0
-        elif x < 0:
-            return -1
-        else:
-            return np.nan
     momentum_df['signal'] = momentum_df['difference'].apply(momentum)
     return momentum_df['signal']
     
@@ -205,67 +213,36 @@ def best_reading(high_series, low_series, trend, window=20):
     dataframe_br['best_reading'] = dataframe_br.apply(pick_reading, axis=1)
     return dataframe_br['best_reading']
 
-    #% Erkennen des Signals
-def clewno_counter_plunger_signals(df):
-    '''Funktion, ...'''
-    
-    #------------------------#
-    #----- IN PROGRESS! -----#
-    #------------------------#
-    
-    status = np.nan
-    stop = np.nan
-    target = np.nan
-    df['signal'] = np.nan
-    for index, row in df.iterrows():
-        if ((status != 1) & (row['atr'] >= 3)):
-            status = 1
-            stop = row['px_last'] - (row['atr'] * 2)
-            target = row['px_last'] + (row['atr'] * 4)
-            df.loc[index, 'signal'] = 1
-        elif status == 1: 
-            if row['px_last'] <= stop:
-                status = 0
-                stop = np.nan
-                target = np.nan
-                df.loc[index, 'signal'] = 0
-            elif row['px_last'] >= target:
-                status = 0
-                stop = np.nan
-                target = np.nan
-                df.loc[index, 'signal'] = 0
-            elif row['trend'] <= 0:
-                status = 0
-                stop = np.nan
-                target = np.nan
-                df.loc[index, 'signal'] = 0
-            else:
-                df.loc[index, 'signal'] = 1
-        else:
-            pass
-        return df
+    #% Trend definieren
+def calc_trend(obs):
+    '''Funktion, die anhand einer Observation den Trend bestimmt. Hierbei stellt die Observation eine Differenz
+    von relevanten Plunger-Kennzahlen dar.'''
+    if obs > 0:
+        return 1
+    elif obs < 0: 
+        return -1
+    else:
+        return 0
                 
     #% Ermitteln der relevanten Kennzahlen 
-def clenow_counter_plunger(high_series, low_series, close_series, ewm_lower=50, ewm_higher=100, window_reading=20):
-    '''Funktion,...'''
+def clenow_counter_plunger(high_series, low_series, close_series, ewm_lower=50, ewm_higher=100, window_reading=20,
+                           true_range=20):
+    '''Funktion, die anhand der Low-, High- und Closing-Prices einen Dataframe zurückgibt, der den Trend, die ATR,
+    das beste Reading und den Plunger enthält. Es kann bei Bedarf auch eine andere Unter- bzw. Obergrenze für den 
+    EWM festgelegt werden (Default 50 bzw. 100). Des Weiteren kann das Fenster der Readings (Default=20) sowie die 
+    True Range (Default=20) variiert werden.'''
     
     #------------------------#
     #----- IN PROGRESS! -----#
     #------------------------#
     
     dataframe_ccp = pd.DataFrame(close_series, columns=['px_last'])
-    dataframe_ccp['trend'] = dataframe_ccp['px_last'].ewm(span=ewm_lower).mean() - dataframe_ccp['px_last'].ewm(span=ewm_higher).mean()
-    def calc_trend(x):
-        if x > 0:
-            return 1
-        elif x < 0: 
-            return -1
-        else:
-            return 0
+    dataframe_ccp['trend'] = dataframe_ccp['px_last'].ewm(span=ewm_lower).mean() - \
+    dataframe_ccp['px_last'].ewm(span=ewm_higher).mean()
     dataframe_ccp['trend'] = dataframe_ccp['trend'].apply(calc_trend)
-    dataframe_ccp['atr'] = average_true_range(high_series, low_series, close_series)
+    dataframe_ccp['atr'] = average_true_range(high_series, low_series, close_series, true_range=true_range)
     dataframe_ccp['best_reading'] = best_reading(high_series, low_series, dataframe_ccp['trend'], window=window_reading)
-    dataframe_ccp['atr_difference'] = (dataframe_ccp['px_last'] - dataframe_ccp['best_reading']) / dataframe_ccp['atr']
+    dataframe_ccp['plunger'] = abs(dataframe_ccp['px_last'] - dataframe_ccp['best_reading']) / dataframe_ccp['atr']
     return dataframe_ccp
     
     
