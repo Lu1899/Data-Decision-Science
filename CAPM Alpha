@@ -1,0 +1,8 @@
+import statsmodels.formula.api as smf
+market_risk_premium = import_csv("XXXXX")
+
+def calc_alpha(index_return,market_risk_premium, df):
+    Regression = smf.ols(formula="index_return ~ market_risk_premium), data=df)
+    regoutput = Regression.fit()
+    alpha = regoutput.params["Intercept"]
+    return alpha
